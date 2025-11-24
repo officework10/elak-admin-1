@@ -386,10 +386,11 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             Route::post('update/{id}', 'workmanagementController@update')->name('update');
             Route::delete('delete/{id}', 'workmanagementController@delete')->name('delete');
             Route::post('status/{id}', 'workmanagementController@status')->name('status');
+            Route::get('admin/workmanagement/show/{id}','workmanagementController@show')->name('show');
         });
        // Management Types
 
-              // Management Types
+      // Management Types
         Route::group(['prefix' => 'GeneralResteiction', 'as' => 'GeneralResteiction.'], function () {
             Route::get('add-new', 'GeneralResteictionController@index')->name('add-new');
             Route::get('list', 'GeneralResteictionController@list')->name('list');
