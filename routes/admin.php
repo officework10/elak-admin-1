@@ -295,6 +295,8 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             Route::post('update/{id}', 'GiftOccasionsController@update')->name('update');
             Route::delete('delete/{id}', 'GiftOccasionsController@delete')->name('delete');
             Route::post('status/{id}', 'GiftOccasionsController@status')->name('status');
+            Route::get('gift-occasions/{id}/gallery', 'GiftOccasionsController@getGallery')->name('gallery');
+
         });
         // Gift Occasions
            // MessageTemplate
