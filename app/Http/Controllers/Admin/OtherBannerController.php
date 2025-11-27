@@ -16,6 +16,7 @@ class OtherBannerController extends Controller
     function promotional_index()
     {
         $module_type = Config::get('module.current_module_type');
+        // dd($module_type);
         return view("admin-views.other-banners.{$module_type}-index");
     }
     function promotional_why_choose()

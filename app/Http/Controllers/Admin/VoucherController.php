@@ -19,6 +19,7 @@ use App\Models\Translation;
 use App\Models\VoucherType;
 use Illuminate\Support\Str;
 use App\Models\ItemCampaign;
+use App\Models\App;
 use Illuminate\Http\Request;
 use App\CentralLogics\Helpers;
 use App\Exports\ItemListExport;
@@ -75,6 +76,27 @@ class VoucherController extends Controller
         ]);
 
     }
+
+   public function getAppName(Request $request)
+{
+    // Integer mein convert karo
+    $clientId = (int) $request->client_id;
+    
+    // Ya yeh bhi kar sakte ho
+    // $clientId = intval($request->client_id);
+    
+    $app = \DB::table('apps')
+        ->where('client_id', $clientId)
+        ->first();
+    
+    if ($app) {
+        return response()->json([
+            'app_name' => $app->app_name
+        ]);
+    }
+    
+    return response()->json(['app_name' => ''], 404);
+}
 
   public function getSubcategories(Request $request)
     {

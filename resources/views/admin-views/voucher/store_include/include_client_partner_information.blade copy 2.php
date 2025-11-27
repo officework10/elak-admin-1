@@ -108,20 +108,6 @@ function initSelect2(element) {
         allowClear: true,
         width: '100%'
     });
-    
-    // Bind Select2 change event immediately after initialization
-    element.on('select2:select', function(e) {
-        console.log('Select2 select event fired');
-        handleClientChange($(this));
-    });
-    
-    // Also bind regular change event as backup
-    element.on('change', function(e) {
-        if (!e.originalEvent) { // Avoid double firing
-            console.log('Regular change event fired');
-            handleClientChange($(this));
-        }
-    });
 }
 
 $(document).ready(function() {
@@ -133,79 +119,63 @@ $(document).ready(function() {
     });
 });
 
-// Handle client change - separate function
-function handleClientChange(selectElement) {
-    console.log('=== handleClientChange called ===');
+// Client Select Change - Using change event instead of select2:select
+$(document).on('change', '.client-select', function(e) {
+    console.log('Client selected in a row');
     
-    let clientId = selectElement.val();
-    let currentRow = selectElement.closest('.item-row');
+    let selectedOption = $(this).find('option:selected');
+    let appName = selectedOption.data('app-name');
+    let clientId = $(this).val();
+    let currentRow = $(this).closest('.item-row');
     let appNameInput = currentRow.find('.app-name-input');
     
     console.log('Selected Client ID:', clientId);
-    console.log('Current Row:', currentRow.length);
-    console.log('App Name Input:', appNameInput.length);
+    console.log('App Name from data:', appName);
     
     if (!clientId) {
         appNameInput.val('');
         return;
     }
 
-    // AJAX call
-    console.log('Making AJAX call for client:', clientId);
-    
-    $.ajax({
-        url: "{{ route('admin.Voucher.getAppName') }}",
-        type: "GET",
-        data: { client_id: clientId },
-        dataType: "json",
-        beforeSend: function() {
-            console.log('AJAX request started...');
-            appNameInput.val('Loading...');
-        },
-        success: function(response) {
-            console.log("=== AJAX Response ===", response);
-            
-            if (response && response.app_name) {
-                appNameInput.val(response.app_name);
-                console.log('App name set:', response.app_name);
-            } else {
-                appNameInput.val('');
-                console.log('No app name found in response');
-                if (typeof toastr !== 'undefined') {
+    // Agar data-app-name attribute mein hai toh seedha use karo
+    if (appName) {
+        appNameInput.val(appName);
+        console.log('App name set from data attribute');
+    } else {
+        // Warna AJAX call karo
+        $.ajax({
+            url: "{{ route('admin.Voucher.getAppName') }}",
+            type: "GET",
+            data: { client_id: clientId },
+            dataType: "json",
+            success: function(response) {
+                console.log("AJAX Response:", response);
+                
+                if (response && response.app_name) {
+                    appNameInput.val(response.app_name);
+                } else {
+                    appNameInput.val('');
                     toastr.warning('App name not found');
                 }
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error("=== AJAX Error ===");
-            console.error("Status:", status);
-            console.error("Error:", error);
-            console.error("Response Text:", xhr.responseText);
-            console.error("Status Code:", xhr.status);
-            appNameInput.val('');
-            if (typeof toastr !== 'undefined') {
+            },
+            error: function(xhr, status, error) {
+                console.error("AJAX Error:", error);
+                appNameInput.val('');
                 toastr.error('Error fetching app name');
             }
-        }
-    });
-}
-
-// Client Select Change - Using change event instead of select2:select
-$(document).on('change', '.client-select', function(e) {
-    console.log('Document level change event - should not fire normally');
+        });
+    }
 });
 
 // Add More Button Click
 $(document).on('click', '#add-more-btn', function() {
-    console.log('=== Add more clicked ===');
+    console.log('Add more clicked');
     
     let repeater = $('#client_repeater');
     
     // Get all client options from first dropdown
     let firstSelect = $('.item-row').first().find('.client-select');
     let optionsHtml = firstSelect.html();
-    
-    console.log('Creating new row with index:', clientIndex);
     
     // Create new row HTML
     let newRowHtml = `
@@ -238,8 +208,6 @@ $(document).on('click', '#add-more-btn', function() {
     
     // Get the newly added select element
     let newSelect = repeater.find('.item-row').last().find('.client-select');
-    
-    console.log('New select element found:', newSelect.length);
     
     // Initialize Select2 on new select
     initSelect2(newSelect);
